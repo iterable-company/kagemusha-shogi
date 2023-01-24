@@ -90,6 +90,16 @@ class Game extends React.Component {
   }
 }
 
+function indexToSujiDan(index) {
+  const suji = 9 - (index % 9);
+  const dan = index / 9 + 1;
+  return [suji, dan];
+}
+
+function sujiDanToIndex(suji, dan) {
+  return (dan - 1) * 9 + (9 - suji)
+}
+
 // ========================================
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
