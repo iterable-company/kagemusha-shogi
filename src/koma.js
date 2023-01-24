@@ -7,7 +7,7 @@ class Koma {
     }
 }
 
-export class Kyosha extends Koma {
+export class Fu extends Koma {
     constructor() {
         super("歩");
     }
