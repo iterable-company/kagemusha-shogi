@@ -1,11 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { Fu , Kyosha, Keima, Gin, Kin, Kaku, Hisha, Gyoku } from './koma';
 import './index.css';
 
 function Square(props) {
+  console.log("props: " + JSON.stringify(props))
   return (
-    <button className={"square" + (props.value && props.value.id === "other" ? " other" : "")} onClick={() => ""} >  
-      {props.value ? props.value.value : ""}
+    <button className={"square" + (props.value && props.value.owner === "other" ? " other" : "")} onClick={() => ""} >  
+      {props.value ? props.value.koma.name : ""}
     </button>
   );
 }
@@ -55,15 +57,15 @@ class Board extends React.Component {
 
 class Game extends React.Component {
   initial = [
-    {id: 'other', value: '香'},{id: 'other', value: '桂'},{id: 'other', value: '銀'},{id: 'other', value: '金'},{id: 'other', value: '玉'},{id: 'other', value: '金'},{id: 'other', value: '銀'},{id: 'other', value: '桂'},{id: 'other', value: '香'},
-    null,{id: 'other', value: '飛'},null,null,null,null,null,{id: 'other', value: '角'},null,
-    {id: 'other', value: '歩'},{id: 'other', value: '歩'},{id: 'other', value: '歩'},{id: 'other', value: '歩'},{id: 'other', value: '歩'},{id: 'other', value: '歩'},{id: 'other', value: '歩'},{id: 'other', value: '歩'},{id: 'other', value: '歩'},
+    {owner: 'other', koma: new Kyosha()},{owner: 'other', koma: new Keima()},{owner: 'other', koma: new Gin()},{owner: 'other', koma: new Kin()},{owner: 'other', koma: new Gyoku()},{owner: 'other', koma: new Kin()},{owner: 'other', koma: new Gin()},{owner: 'other', koma: new Keima()},{owner: 'other', koma: new Kyosha()},
+    null,{owner: 'other', koma: new Hisha()},null,null,null,null,null,{owner: 'other', koma: new Kaku()},null,
+    {owner: 'other', koma: new Fu()},{owner: 'other', koma: new Fu()},{owner: 'other', koma: new Fu()},{owner: 'other', koma: new Fu()},{owner: 'other', koma: new Fu()},{owner: 'other', koma: new Fu()},{owner: 'other', koma: new Fu()},{owner: 'other', koma: new Fu()},{owner: 'other', koma: new Fu()},
     null,null,null,null,null,null,null,null,null,
     null,null,null,null,null,null,null,null,null,
     null,null,null,null,null,null,null,null,null,
-    {id: 'mine', value: '歩'},{id: 'mine', value: '歩'},{id: 'mine', value: '歩'},{id: 'mine', value: '歩'},{id: 'mine', value: '歩'},{id: 'mine', value: '歩'},{id: 'mine', value: '歩'},{id: 'mine', value: '歩'},{id: 'mine', value: '歩'},
-    null,{id: 'mine', value: '角'},null,null,null,null,null,{id: 'mine', value: '飛'},null,
-    {id: 'mine', value: '香'},{id: 'mine', value: '桂'},{id: 'mine', value: '銀'},{id: 'mine', value: '金'},{id: 'mine', value: '玉'},{id: 'mine', value: '金'},{id: 'mine', value: '銀'},{id: 'mine', value: '桂'},{id: 'mine', value: '香'}
+    {owner: 'mine', koma: new Fu()},{owner: 'mine', koma: new Fu()},{owner: 'mine', koma: new Fu()},{owner: 'mine', koma: new Fu()},{owner: 'mine', koma: new Fu()},{owner: 'mine', koma: new Fu()},{owner: 'mine', koma: new Fu()},{owner: 'mine', koma: new Fu()},{owner: 'mine', koma: new Fu()},
+    null,{owner: 'mine', koma: new Kaku()},null,null,null,null,null,{owner: 'mine', koma: new Hisha()},null,
+    {owner: 'mine', koma: new Kyosha()},{owner: 'mine', koma: new Keima()},{owner: 'mine', koma: new Gin()},{owner: 'mine', koma: new Kin()},{owner: 'mine', koma: new Gyoku()},{owner: 'mine', koma: new Kin()},{owner: 'mine', koma: new Gin()},{owner: 'mine', koma: new Keima()},{owner: 'mine', koma: new Kyosha()}
   ];
   constructor(props) {
     super(props);
@@ -90,13 +92,13 @@ class Game extends React.Component {
   }
 }
 
-function indexToSujiDan(index) {
+function indexToSujowneran(index) {
   const suji = 9 - (index % 9);
   const dan = index / 9 + 1;
   return [suji, dan];
 }
 
-function sujiDanToIndex(suji, dan) {
+function sujowneranToIndex(suji, dan) {
   return (dan - 1) * 9 + (9 - suji)
 }
 
