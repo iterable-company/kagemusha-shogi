@@ -6,8 +6,8 @@ import './index.css';
 function Square(props) {
   console.log("props: " + JSON.stringify(props))
   return (
-    <button className={"square" + (props.value && props.value.owner === "other" ? " other" : "")} onClick={() => ""} >  
-      {props.value ? props.value.koma.name : ""}
+    <button className={"square" + (props.value && props.value.owner === "other" ? " other" : "") + (props.value && ["成香","成桂"].includes(props.value.koma.displayName()) ? " promoted-keikyo" : "")} onClick={() => ""} >  
+      {props.value ? props.value.koma.displayName() : ""}
     </button>
   );
 }

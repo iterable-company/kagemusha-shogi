@@ -1,6 +1,8 @@
 class Koma {
-    constructor(name) {
+    constructor(name, promotedName) {
         this.name = name;
+        this.promotedName = promotedName;
+        this.isPromoted = false;
     }
     canMove(virtical, horizontal) {
         return false;
@@ -11,11 +13,15 @@ class Koma {
     canPromote() {
         return !this.isPromoted;
     }
+    displayName() {
+        if (this.isPromoted) return this.promotedName;
+        return this.name;
+    }
 }
 
 export class Fu extends Koma {
     constructor() {
-        super("歩");
+        super("歩", "と");
     }
     canMove(virtical, horizontal) {
         if (this.isPromoted) return canMoveOfKin(virtical, horizontal);
@@ -25,7 +31,7 @@ export class Fu extends Koma {
 
 export class Kyosha extends Koma {
     constructor() {
-        super("香");
+        super("香", "成香");
     }
     canMove(virtical, horizontal) {
         if (this.isPromoted) return canMoveOfKin(virtical, horizontal);
@@ -35,7 +41,7 @@ export class Kyosha extends Koma {
 
 export class Keima extends Koma {
     constructor() {
-        super("桂");
+        super("桂", "成桂");
     }
     canMove(virtical, horizontal) {
         if (this.isPromoted) return canMoveOfKin(virtical, horizontal);
@@ -48,7 +54,7 @@ export class Keima extends Koma {
 
 export class Gin extends Koma {
     constructor() {
-        super("銀");
+        super("銀", "全");
     }
     canMove(virtical, horizontal) {
         if (this.isPromoted) return canMoveOfKin(virtical, horizontal);
@@ -59,7 +65,7 @@ export class Gin extends Koma {
 
 export class Kin extends Koma {
     constructor() {
-        super("金");
+        super("金", "");
     }
     canMove(virtical, horizontal) {
         if (this.isPromoted) return canMoveOfKin(virtical, horizontal);
@@ -72,7 +78,7 @@ export class Kin extends Koma {
 
 export class Kaku extends Koma {
     constructor() {
-        super("角");
+        super("角", "馬");
     }
     canMove(virtical, horizontal) {
         return (Math.abs(virtical) === Math.abs(horizontal)) ||
@@ -82,7 +88,7 @@ export class Kaku extends Koma {
 
 export class Hisha extends Koma {
     constructor() {
-        super("飛");
+        super("飛", "龍");
     }
     canMove(virtical, horizontal) {
         return (virtical === 0 || horizontal === 0) ||
@@ -92,7 +98,7 @@ export class Hisha extends Koma {
 
 export class Gyoku extends Koma {
     constructor() {
-        super("玉");
+        super("玉", "");
     }
     canMove(virtical, horizontal) {
         return canMoveOfGyoku(virtical, horizontal);

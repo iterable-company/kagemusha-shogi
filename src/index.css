@@ -43,7 +43,11 @@ body {
     writing-mode: vertical-lr;
    -webkit-transform: rotate(-180deg);
    -moz-transform: rotate(-180deg);
-}
+  }
+
+  .promoted-keikyo {
+    line-height: 50%;
+  }
   
   .game {
     display: flex;
