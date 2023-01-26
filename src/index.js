@@ -4,22 +4,61 @@ import { Fu , Kyosha, Keima, Gin, Kin, Kaku, Hisha, Gyoku } from './koma';
 import './index.css';
 
 function Square(props) {
-  console.log("props: " + JSON.stringify(props))
+  var classNames = ["square"];
+  if (props.value && props.value.owner === "other") {
+    classNames.push("other");
+  }
+  if (props.value && ["成香","成桂"].includes(props.value.koma.displayName())) {
+    classNames.push("promoted-keikyo");
+  }
+
   return (
-    <button className={"square" + (props.value && props.value.owner === "other" ? " other" : "") + (props.value && ["成香","成桂"].includes(props.value.koma.displayName()) ? " promoted-keikyo" : "")} onClick={() => ""} >  
+    <button className={classNames.join(" ")} onClick={props.onClick}>  
       {props.value ? props.value.koma.displayName() : ""}
     </button>
   );
 }
 
 class Board extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      clickedIndex: null,
+    }
+  }
   renderSquare(i) {
-    console.log("i: " + i + ", squares[i]: " + this.props.squares[i]);
     return (
       <Square
         value={this.props.squares[i]}
+        onClick={() => this.handleClick(i)}
       />
     );
+  }
+
+  handleClick(i) {
+    if (!this.state.clickedIndex) {
+      if (!this.props.squares[i]) {
+        return;
+      }
+      this.setState({
+        clickedIndex: i,
+      })
+      return;
+    } 
+    const beforeIndex = this.state.clickedIndex;
+    const beforeSujiDan = indexToSujiDan(beforeIndex);
+    const afterSujiDan = indexToSujiDan(i);
+    const koma = this.props.squares[beforeIndex].koma;
+    const virticalDiff = beforeSujiDan[1] - afterSujiDan[1];
+    const horizontalDiff = afterSujiDan[0] - beforeSujiDan[0];
+    if (!koma.canMove(virticalDiff, horizontalDiff)) {
+      alert("そこには動かせません！");
+      return;
+    }
+    this.props.onKomaMove(beforeIndex, i);
+    this.setState({
+      clickedIndex: null,
+    })
   }
 
   renderRow(i) {
@@ -39,6 +78,7 @@ class Board extends React.Component {
   }
 
   render() {
+
     return (
       <div>
         {this.renderRow(0)}
@@ -71,9 +111,16 @@ class Game extends React.Component {
     super(props);
     this.state = {
       history: [],
-      stepNumber: 0,
       isAsc: true,
     }
+  }
+
+  handleKomaMove(beforeIndex, afterIndex) {
+    const history = this.state.history.slice();
+    history.push({beforeIndex: beforeIndex, afterIndex: afterIndex});
+    this.setState({
+      history: history,
+    })
   }
 
   render() {
@@ -85,6 +132,7 @@ class Game extends React.Component {
         <div className="game-board">
           <Board
             squares={currentSquare}
+            onKomaMove={(beforeIndex, afterIndex) => this.handleKomaMove(beforeIndex, afterIndex)}
           />
         </div>
       </div>
@@ -92,13 +140,13 @@ class Game extends React.Component {
   }
 }
 
-function indexToSujowneran(index) {
+function indexToSujiDan(index) {
   const suji = 9 - (index % 9);
-  const dan = index / 9 + 1;
+  const dan = Math.floor(index / 9) + 1;
   return [suji, dan];
 }
 
-function sujowneranToIndex(suji, dan) {
+function sujiDanToIndex(suji, dan) {
   return (dan - 1) * 9 + (9 - suji)
 }
 
