@@ -53,6 +53,9 @@ class Board extends React.Component {
     const horizontalDiff = afterSujiDan[0] - beforeSujiDan[0];
     if (!koma.canMove(virticalDiff, horizontalDiff)) {
       alert("そこには動かせません！");
+      this.setState({
+        clickedIndex: null,
+      })
       return;
     }
     this.props.onKomaMove(beforeIndex, i);
@@ -124,8 +127,9 @@ class Game extends React.Component {
   }
 
   render() {
-    const currentSquare = this.initial.slice();
-    console.log(currentSquare)
+    const init = this.initial.slice();
+    const history = this.state.history.slice();
+    const currentSquare = calculateCurrentSquares(init, history);
 
     return (
       <div className="game">
@@ -148,6 +152,17 @@ function indexToSujiDan(index) {
 
 function sujiDanToIndex(suji, dan) {
   return (dan - 1) * 9 + (9 - suji)
+}
+
+function calculateCurrentSquares(init, history) {
+  return history.reduce((acc, move) => {
+    const beforeIndex = move.beforeIndex;
+    const afterIndex = move.afterIndex;
+    const value = acc[beforeIndex];
+    acc[beforeIndex] = null;
+    acc[afterIndex] = value;
+    return acc;
+  }, init)
 }
 
 // ========================================
