@@ -3,21 +3,20 @@ import ReactDOM from 'react-dom/client';
 import { Fu , Kyosha, Keima, Gin, Kin, Kaku, Hisha, Gyoku } from './koma';
 import { Player } from './player';
 import './index.css';
-import { toHaveAccessibleDescription } from '@testing-library/jest-dom/dist/matchers';
 
 function Square(props) {
   function notYourTurn() {
     window.alert("あなたの手番ではありません。");
   }
   var classNames = ["square"];
-  if (props.value && props.value.owner != props.player) {
+  if (props.value && props.value.owner !== props.player) {
     classNames.push("other");
   }
   if (props.value && ["成香","成桂"].includes(props.value.koma.displayName())) {
     classNames.push("promoted-keikyo");
   }
 
-  const onClickHandler = props.player == props.turn ? props.onClick : notYourTurn;
+  const onClickHandler = props.player === props.turn ? props.onClick : notYourTurn;
   return (
     <button className={classNames.join(" ")} onClick={onClickHandler}>  
       {props.value ? props.value.koma.displayName() : ""}
@@ -46,36 +45,35 @@ class Board extends React.Component {
     );
   }
 
-  handleClick(i) {
-    if (!this.state.clickedIndex) {
-      if (!this.props.squares[i]) {
-        window.alert("駒を選択してください。")
-        return;
-      }
-      if (this.props.squares[i].owner != this.props.player) {
-        window.alert("敵の駒は選択できません。")
-        return;
-      }
-      if (!this.props.kagemusha) {
-        this.props.onKagemushaSelected(this.props.player, i);
-        window.alert(this.props.player + ": 影武者が選択されました。");
-        return;
-      }
-      this.setState({
-        clickedIndex: i,
-      })
+  handleClickWhenNotClicked(i) {
+    if (!this.props.squares[i]) {
+      window.alert("駒を選択してください。")
       return;
-    } 
+    }
+    if (this.props.squares[i].owner !== this.props.player) {
+      window.alert("敵の駒は選択できません。")
+      return;
+    }
+    if (!this.props.kagemusha) {
+      window.alert(this.props.player + ": 影武者が選択されました。");
+      this.props.onKagemushaSelected(this.props.player, i);
+      return;
+    }
+    this.setState({
+      clickedIndex: i,
+    })
+  }
+
+  handleClickWhenAlreadyClicked(i) {
     const beforeIndex = this.state.clickedIndex;
     const afterIndex = i;
     const beforeSujiDan = indexToSujiDan(beforeIndex);
     const afterSujiDan = indexToSujiDan(afterIndex);
     const koma = this.props.squares[beforeIndex].koma;
-    var coeff = 0;
-    if (this.props.player === Player.first) { coeff = 1; }
-    else { coeff = -1; }
+    const coeff = this.getCoeff(this.props.player);
     const virticalDiff = coeff * (beforeSujiDan[1] - afterSujiDan[1]);
     const horizontalDiff = coeff * (afterSujiDan[0] - beforeSujiDan[0]);
+
     if (!koma.canMove(virticalDiff, horizontalDiff)) {
       alert("そこには動かせません！");
       this.setState({
@@ -91,6 +89,19 @@ class Board extends React.Component {
     this.setState({
       clickedIndex: null,
     })
+  }
+
+  getCoeff(player) {
+    if (player === Player.first) { return 1; }
+    else { return -1; }
+  }
+
+  handleClick(i) {
+    if (!this.state.clickedIndex) {
+      this.handleClickWhenNotClicked(i);
+      return;
+    }
+    this.handleClickWhenAlreadyClicked(i)
   }
 
   renderRow(i) {
@@ -155,7 +166,7 @@ class Game extends React.Component {
     history.push({beforeIndex: beforeIndex, afterIndex: afterIndex, promote: promote});
     this.setState({
       history: history,
-      turn: this.state.turn == Player.first ? Player.second : Player.first,
+      turn: this.state.turn === Player.first ? Player.second : Player.first,
     })
   }
 
@@ -163,11 +174,11 @@ class Game extends React.Component {
     const kagemusha = this.state.kagemusha;
     var firstKagemusha = kagemusha.first;
     var secondKagemusha = kagemusha.second;
-    if (player == Player.first) {firstKagemusha = i}
+    if (player === Player.first) {firstKagemusha = i}
     else {secondKagemusha = i}
     this.setState({
       kagemusha: {first: firstKagemusha, second: secondKagemusha},
-      turn: this.state.turn == Player.first ? Player.second : Player.first,
+      turn: this.state.turn === Player.first ? Player.second : Player.first,
     })
   } 
 
@@ -236,8 +247,8 @@ function canPromote(player, koma, beforeIndex, afterIndex) {
 
 function isPromoteIndex(player, index) {
   const dan = indexToSujiDan(index)[1];
-  if (player == Player.first && (1 <= dan && dan <= 3)) return true;
-  if (player == Player.second && (7 <= dan && dan <= 9)) return true;
+  if (player === Player.first && (1 <= dan && dan <= 3)) return true;
+  if (player === Player.second && (7 <= dan && dan <= 9)) return true;
   return false; 
 }
 
