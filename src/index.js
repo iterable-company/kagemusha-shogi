@@ -74,7 +74,10 @@ class Board extends React.Component {
     const virticalDiff = coeff * (beforeSujiDan[1] - afterSujiDan[1]);
     const horizontalDiff = coeff * (afterSujiDan[0] - beforeSujiDan[0]);
 
-    if (!koma.canMove(virticalDiff, horizontalDiff)) {
+    if (
+      !koma.canMove(virticalDiff, horizontalDiff) || 
+      (this.props.squares[afterIndex] && this.props.squares[afterIndex].owner === this.props.player)
+    ) {
       alert("そこには動かせません！");
       this.setState({
         clickedIndex: null,
@@ -121,9 +124,13 @@ class Board extends React.Component {
   }
 
   render() {
+    var information = "";
+    if (this.props.turn !== this.props.player) {information = "相手番です。";}
+    else if (!this.props.kagemusha) {information = "影武者を選んでください"}
+    else {information = "あなたの手番です。"}
     return (
       <div>
-        {this.props.kagemusha ? <p></p> : <p>{this.props.player} : 影武者を選んでください</p>}
+        <p>{information}</p>
         <div>
           {this.renderRow(0)}
           {this.renderRow(9)}
