@@ -1,8 +1,9 @@
-import React, { useRef, useCallback } from 'react';
+import React  from 'react';
 import ReactDOM from 'react-dom/client';
 import { Fu , Kyosha, Keima, Gin, Kin, Kaku, Hisha, Gyoku } from './koma';
 import { Player } from './player';
 import './index.css';
+import { toHaveAccessibleDescription } from '@testing-library/jest-dom/dist/matchers';
 
 function Square(props) {
   function notYourTurn() {
@@ -48,6 +49,16 @@ class Board extends React.Component {
   handleClick(i) {
     if (!this.state.clickedIndex) {
       if (!this.props.squares[i]) {
+        window.alert("駒を選択してください。")
+        return;
+      }
+      if (this.props.squares[i].owner != this.props.player) {
+        window.alert("敵の駒は選択できません。")
+        return;
+      }
+      if (!this.props.kagemusha) {
+        this.props.onKagemushaSelected(this.props.player, i);
+        window.alert(this.props.player + ": 影武者が選択されました。");
         return;
       }
       this.setState({
@@ -72,11 +83,11 @@ class Board extends React.Component {
       })
       return;
     }
-    this.promote = false;
+    var promote = false;
     if (canPromote(this.props.player, koma, beforeIndex, afterIndex)) {
-      this.promote = window.confirm("成りますか？");
+      promote = window.confirm("成りますか？");
     }
-    this.props.onKomaMove(beforeIndex, i, this.promote);
+    this.props.onKomaMove(beforeIndex, i, promote);
     this.setState({
       clickedIndex: null,
     })
@@ -99,9 +110,9 @@ class Board extends React.Component {
   }
 
   render() {
-
     return (
       <div>
+        {this.props.kagemusha ? <p></p> : <p>{this.props.player} : 影武者を選んでください</p>}
         <div>
           {this.renderRow(0)}
           {this.renderRow(9)}
@@ -135,6 +146,7 @@ class Game extends React.Component {
     this.state = {
       history: [],
       turn: Player.first,
+      kagemusha: {first: null, second: null},
     }
   }
 
@@ -146,6 +158,18 @@ class Game extends React.Component {
       turn: this.state.turn == Player.first ? Player.second : Player.first,
     })
   }
+
+  handleKagemushaSelected(player, i) {
+    const kagemusha = this.state.kagemusha;
+    var firstKagemusha = kagemusha.first;
+    var secondKagemusha = kagemusha.second;
+    if (player == Player.first) {firstKagemusha = i}
+    else {secondKagemusha = i}
+    this.setState({
+      kagemusha: {first: firstKagemusha, second: secondKagemusha},
+      turn: this.state.turn == Player.first ? Player.second : Player.first,
+    })
+  } 
 
   render() {
     const init = this.initial.slice();
@@ -160,6 +184,8 @@ class Game extends React.Component {
             onKomaMove={(beforeIndex, afterIndex, promote) => this.handleKomaMove(beforeIndex, afterIndex, promote)}
             player={Player.first}
             turn={this.state.turn}
+            kagemusha={this.state.kagemusha.first}
+            onKagemushaSelected={(i) => this.handleKagemushaSelected(Player.first, i)}
           />
           <br />
           <Board
@@ -167,6 +193,8 @@ class Game extends React.Component {
             onKomaMove={(beforeIndex, afterIndex, promote) => this.handleKomaMove(beforeIndex, afterIndex, promote)}
             player={Player.second}
             turn={this.state.turn}
+            kagemusha={this.state.kagemusha.second}
+            onKagemushaSelected={(i) => this.handleKagemushaSelected(Player.second, i)}
           />
         </div>
       </div>
@@ -201,12 +229,12 @@ function calculateCurrentSquares(init, history) {
 
 function canPromote(player, koma, beforeIndex, afterIndex) {
   if (!koma.canPromote()) return false;
-  if (isPromotedIndex(player, afterIndex)) return true;
-  if (isPromotedIndex(player, beforeIndex)) return true;
+  if (isPromoteIndex(player, afterIndex)) return true;
+  if (isPromoteIndex(player, beforeIndex)) return true;
   return false;
 }
 
-function isPromotedIndex(player, index) {
+function isPromoteIndex(player, index) {
   const dan = indexToSujiDan(index)[1];
   if (player == Player.first && (1 <= dan && dan <= 3)) return true;
   if (player == Player.second && (7 <= dan && dan <= 9)) return true;
