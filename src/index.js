@@ -5,6 +5,9 @@ import { Player } from './player';
 import './index.css';
 
 function Square(props) {
+  function notYourTurn() {
+    window.alert("あなたの手番ではありません。");
+  }
   var classNames = ["square"];
   if (props.value && props.value.owner != props.player) {
     classNames.push("other");
@@ -13,8 +16,9 @@ function Square(props) {
     classNames.push("promoted-keikyo");
   }
 
+  const onClickHandler = props.player == props.turn ? props.onClick : notYourTurn;
   return (
-    <button className={classNames.join(" ")} onClick={props.onClick}>  
+    <button className={classNames.join(" ")} onClick={onClickHandler}>  
       {props.value ? props.value.koma.displayName() : ""}
     </button>
   );
@@ -36,12 +40,10 @@ class Board extends React.Component {
         value={this.props.squares[index]}
         onClick={() => this.handleClick(index)}
         player={this.props.player}
+        turn={this.props.turn}
       />
     );
   }
-
-  yesPromote() { this.promote = true; this.setState({showPromoteDialog: false});}
-  noPromote() { this.promote = false; this.setState({showPromoteDialog: false});}
 
   handleClick(i) {
     if (!this.state.clickedIndex) {
@@ -132,6 +134,7 @@ class Game extends React.Component {
     super(props);
     this.state = {
       history: [],
+      turn: Player.first,
     }
   }
 
@@ -140,6 +143,7 @@ class Game extends React.Component {
     history.push({beforeIndex: beforeIndex, afterIndex: afterIndex, promote: promote});
     this.setState({
       history: history,
+      turn: this.state.turn == Player.first ? Player.second : Player.first,
     })
   }
 
@@ -155,12 +159,14 @@ class Game extends React.Component {
             squares={currentSquare}
             onKomaMove={(beforeIndex, afterIndex, promote) => this.handleKomaMove(beforeIndex, afterIndex, promote)}
             player={Player.first}
+            turn={this.state.turn}
           />
           <br />
           <Board
             squares={currentSquare}
             onKomaMove={(beforeIndex, afterIndex, promote) => this.handleKomaMove(beforeIndex, afterIndex, promote)}
             player={Player.second}
+            turn={this.state.turn}
           />
         </div>
       </div>
