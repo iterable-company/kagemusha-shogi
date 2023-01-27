@@ -49,6 +49,10 @@ body {
     line-height: 50%;
     font-size: 16px !important;
   }
+
+  .kagemusha {
+    color: blue !important;
+  }
   
   .game {
     display: flex;

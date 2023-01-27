@@ -15,6 +15,9 @@ function Square(props) {
   if (props.value && ["成香","成桂"].includes(props.value.koma.displayName())) {
     classNames.push("promoted-keikyo");
   }
+  if (props.isKagemusha) {
+    classNames.push("kagemusha");
+  }
 
   const onClickHandler = props.player === props.turn ? props.onClick : notYourTurn;
   return (
@@ -32,14 +35,13 @@ class Board extends React.Component {
     }
   }
   renderSquare(i) {
-    var index = -1;
-    if (this.props.player === Player.first) {index = i;}
-    else {index = 80 - i;}
+    const index = getIndex(this.props.player, i);
     return (
       <Square
         value={this.props.squares[index]}
         onClick={() => this.handleClick(index)}
         player={this.props.player}
+        isKagemusha={this.props.kagemusha === index}
         turn={this.props.turn}
       />
     );
@@ -56,7 +58,7 @@ class Board extends React.Component {
     }
     if (!this.props.kagemusha) {
       window.alert(this.props.player + ": 影武者が選択されました。");
-      this.props.onKagemushaSelected(this.props.player, i);
+      this.props.onKagemushaSelected(i);
       return;
     }
     this.setState({
@@ -168,12 +170,18 @@ class Game extends React.Component {
     }
   }
 
-  handleKomaMove(beforeIndex, afterIndex, promote) {
+  handleKomaMove(beforeIndex, afterIndex, promote, player) {
+    const init = this.initial.slice();
     const history = this.state.history.slice();
+    const currentSquare = calculateCurrentSquares(init, history);
+    const kagemusha = getKagemusha(player, this.state.kagemusha, currentSquare, beforeIndex, afterIndex);
+
     history.push({beforeIndex: beforeIndex, afterIndex: afterIndex, promote: promote});
+
     this.setState({
       history: history,
       turn: this.state.turn === Player.first ? Player.second : Player.first,
+      kagemusha: kagemusha,
     })
   }
 
@@ -199,7 +207,7 @@ class Game extends React.Component {
         <div className="game-board">
           <Board
             squares={currentSquare}
-            onKomaMove={(beforeIndex, afterIndex, promote) => this.handleKomaMove(beforeIndex, afterIndex, promote)}
+            onKomaMove={(beforeIndex, afterIndex, promote) => this.handleKomaMove(beforeIndex, afterIndex, promote, Player.first)}
             player={Player.first}
             turn={this.state.turn}
             kagemusha={this.state.kagemusha.first}
@@ -208,7 +216,7 @@ class Game extends React.Component {
           <br />
           <Board
             squares={currentSquare}
-            onKomaMove={(beforeIndex, afterIndex, promote) => this.handleKomaMove(beforeIndex, afterIndex, promote)}
+            onKomaMove={(beforeIndex, afterIndex, promote) => this.handleKomaMove(beforeIndex, afterIndex, promote, Player.second)}
             player={Player.second}
             turn={this.state.turn}
             kagemusha={this.state.kagemusha.second}
@@ -257,6 +265,26 @@ function isPromoteIndex(player, index) {
   if (player === Player.first && (1 <= dan && dan <= 3)) return true;
   if (player === Player.second && (7 <= dan && dan <= 9)) return true;
   return false; 
+}
+
+function getKagemusha(player, kagemusha, currentSquare, beforeIndex, afterIndex) {
+  console.log("kagemusha, beforeIndex,afterIndex" + JSON.stringify(kagemusha) + "," + beforeIndex + "," + afterIndex);
+  if (currentSquare[beforeIndex].owner !== player) { return kagemusha; }
+  
+  var firstKagemusha = kagemusha.first;
+  var secondKagemusha = kagemusha.second;
+  if (player === Player.first && beforeIndex === firstKagemusha) {
+    firstKagemusha = afterIndex;
+  }
+  else if (player === Player.second && beforeIndex === secondKagemusha){
+    secondKagemusha = afterIndex;
+  }
+  return {first: firstKagemusha, second: secondKagemusha};
+}
+
+function getIndex(player, i) {
+  if (player === Player.first) { return i;}
+  else { return  80 - i;}
 }
 
 // ========================================
