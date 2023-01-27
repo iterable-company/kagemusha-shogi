@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useCallback } from 'react';
 import ReactDOM from 'react-dom/client';
 import { Fu , Kyosha, Keima, Gin, Kin, Kaku, Hisha, Gyoku } from './koma';
 import { Player } from './player';
@@ -40,6 +40,9 @@ class Board extends React.Component {
     );
   }
 
+  yesPromote() { this.promote = true; this.setState({showPromoteDialog: false});}
+  noPromote() { this.promote = false; this.setState({showPromoteDialog: false});}
+
   handleClick(i) {
     if (!this.state.clickedIndex) {
       if (!this.props.squares[i]) {
@@ -51,8 +54,9 @@ class Board extends React.Component {
       return;
     } 
     const beforeIndex = this.state.clickedIndex;
+    const afterIndex = i;
     const beforeSujiDan = indexToSujiDan(beforeIndex);
-    const afterSujiDan = indexToSujiDan(i);
+    const afterSujiDan = indexToSujiDan(afterIndex);
     const koma = this.props.squares[beforeIndex].koma;
     var coeff = 0;
     if (this.props.player === Player.first) { coeff = 1; }
@@ -66,7 +70,11 @@ class Board extends React.Component {
       })
       return;
     }
-    this.props.onKomaMove(beforeIndex, i);
+    this.promote = false;
+    if (canPromote(this.props.player, koma, beforeIndex, afterIndex)) {
+      this.promote = window.confirm("成りますか？");
+    }
+    this.props.onKomaMove(beforeIndex, i, this.promote);
     this.setState({
       clickedIndex: null,
     })
@@ -92,15 +100,17 @@ class Board extends React.Component {
 
     return (
       <div>
-        {this.renderRow(0)}
-        {this.renderRow(9)}
-        {this.renderRow(18)}
-        {this.renderRow(27)}
-        {this.renderRow(36)}
-        {this.renderRow(45)}
-        {this.renderRow(54)}
-        {this.renderRow(63)}
-        {this.renderRow(72)}
+        <div>
+          {this.renderRow(0)}
+          {this.renderRow(9)}
+          {this.renderRow(18)}
+          {this.renderRow(27)}
+          {this.renderRow(36)}
+          {this.renderRow(45)}
+          {this.renderRow(54)}
+          {this.renderRow(63)}
+          {this.renderRow(72)}
+        </div>
       </div>
     );
   }
@@ -125,9 +135,9 @@ class Game extends React.Component {
     }
   }
 
-  handleKomaMove(beforeIndex, afterIndex) {
+  handleKomaMove(beforeIndex, afterIndex, promote) {
     const history = this.state.history.slice();
-    history.push({beforeIndex: beforeIndex, afterIndex: afterIndex});
+    history.push({beforeIndex: beforeIndex, afterIndex: afterIndex, promote: promote});
     this.setState({
       history: history,
     })
@@ -143,13 +153,13 @@ class Game extends React.Component {
         <div className="game-board">
           <Board
             squares={currentSquare}
-            onKomaMove={(beforeIndex, afterIndex) => this.handleKomaMove(beforeIndex, afterIndex)}
+            onKomaMove={(beforeIndex, afterIndex, promote) => this.handleKomaMove(beforeIndex, afterIndex, promote)}
             player={Player.first}
           />
           <br />
           <Board
             squares={currentSquare}
-            onKomaMove={(beforeIndex, afterIndex) => this.handleKomaMove(beforeIndex, afterIndex)}
+            onKomaMove={(beforeIndex, afterIndex, promote) => this.handleKomaMove(beforeIndex, afterIndex, promote)}
             player={Player.second}
           />
         </div>
@@ -172,11 +182,29 @@ function calculateCurrentSquares(init, history) {
   return history.reduce((acc, move) => {
     const beforeIndex = move.beforeIndex;
     const afterIndex = move.afterIndex;
+    const promote = move.promote;
     const value = acc[beforeIndex];
+    if (promote) {
+      value.koma.promote();
+    }
     acc[beforeIndex] = null;
     acc[afterIndex] = value;
     return acc;
   }, init)
+}
+
+function canPromote(player, koma, beforeIndex, afterIndex) {
+  if (!koma.canPromote()) return false;
+  if (isPromotedIndex(player, afterIndex)) return true;
+  if (isPromotedIndex(player, beforeIndex)) return true;
+  return false;
+}
+
+function isPromotedIndex(player, index) {
+  const dan = indexToSujiDan(index)[1];
+  if (player == Player.first && (1 <= dan && dan <= 3)) return true;
+  if (player == Player.second && (7 <= dan && dan <= 9)) return true;
+  return false; 
 }
 
 // ========================================
