@@ -5,7 +5,7 @@ import './index.css';
 
 function Square(props) {
   var classNames = ["square"];
-  if (props.value && props.value.owner === "other") {
+  if (props.value && props.value.owner != props.player) {
     classNames.push("other");
   }
   if (props.value && ["成香","成桂"].includes(props.value.koma.displayName())) {
@@ -27,10 +27,14 @@ class Board extends React.Component {
     }
   }
   renderSquare(i) {
+    var index = -1;
+    if (this.props.player === "first") {index = i;}
+    else {index = 80 - i;}
     return (
       <Square
-        value={this.props.squares[i]}
-        onClick={() => this.handleClick(i)}
+        value={this.props.squares[index]}
+        onClick={() => this.handleClick(index)}
+        player={this.props.player}
       />
     );
   }
@@ -49,8 +53,11 @@ class Board extends React.Component {
     const beforeSujiDan = indexToSujiDan(beforeIndex);
     const afterSujiDan = indexToSujiDan(i);
     const koma = this.props.squares[beforeIndex].koma;
-    const virticalDiff = beforeSujiDan[1] - afterSujiDan[1];
-    const horizontalDiff = afterSujiDan[0] - beforeSujiDan[0];
+    var coeff = 0;
+    if (this.props.player === "first") { coeff = 1; }
+    else { coeff = -1; }
+    const virticalDiff = coeff * (beforeSujiDan[1] - afterSujiDan[1]);
+    const horizontalDiff = coeff * (afterSujiDan[0] - beforeSujiDan[0]);
     if (!koma.canMove(virticalDiff, horizontalDiff)) {
       alert("そこには動かせません！");
       this.setState({
@@ -100,15 +107,15 @@ class Board extends React.Component {
 
 class Game extends React.Component {
   initial = [
-    {owner: 'other', koma: new Kyosha()},{owner: 'other', koma: new Keima()},{owner: 'other', koma: new Gin()},{owner: 'other', koma: new Kin()},{owner: 'other', koma: new Gyoku()},{owner: 'other', koma: new Kin()},{owner: 'other', koma: new Gin()},{owner: 'other', koma: new Keima()},{owner: 'other', koma: new Kyosha()},
-    null,{owner: 'other', koma: new Hisha()},null,null,null,null,null,{owner: 'other', koma: new Kaku()},null,
-    {owner: 'other', koma: new Fu()},{owner: 'other', koma: new Fu()},{owner: 'other', koma: new Fu()},{owner: 'other', koma: new Fu()},{owner: 'other', koma: new Fu()},{owner: 'other', koma: new Fu()},{owner: 'other', koma: new Fu()},{owner: 'other', koma: new Fu()},{owner: 'other', koma: new Fu()},
+    {owner: 'second', koma: new Kyosha()},{owner: 'second', koma: new Keima()},{owner: 'second', koma: new Gin()},{owner: 'second', koma: new Kin()},{owner: 'second', koma: new Gyoku()},{owner: 'second', koma: new Kin()},{owner: 'second', koma: new Gin()},{owner: 'second', koma: new Keima()},{owner: 'second', koma: new Kyosha()},
+    null,{owner: 'second', koma: new Hisha()},null,null,null,null,null,{owner: 'second', koma: new Kaku()},null,
+    {owner: 'second', koma: new Fu()},{owner: 'second', koma: new Fu()},{owner: 'second', koma: new Fu()},{owner: 'second', koma: new Fu()},{owner: 'second', koma: new Fu()},{owner: 'second', koma: new Fu()},{owner: 'second', koma: new Fu()},{owner: 'second', koma: new Fu()},{owner: 'second', koma: new Fu()},
     null,null,null,null,null,null,null,null,null,
     null,null,null,null,null,null,null,null,null,
     null,null,null,null,null,null,null,null,null,
-    {owner: 'mine', koma: new Fu()},{owner: 'mine', koma: new Fu()},{owner: 'mine', koma: new Fu()},{owner: 'mine', koma: new Fu()},{owner: 'mine', koma: new Fu()},{owner: 'mine', koma: new Fu()},{owner: 'mine', koma: new Fu()},{owner: 'mine', koma: new Fu()},{owner: 'mine', koma: new Fu()},
-    null,{owner: 'mine', koma: new Kaku()},null,null,null,null,null,{owner: 'mine', koma: new Hisha()},null,
-    {owner: 'mine', koma: new Kyosha()},{owner: 'mine', koma: new Keima()},{owner: 'mine', koma: new Gin()},{owner: 'mine', koma: new Kin()},{owner: 'mine', koma: new Gyoku()},{owner: 'mine', koma: new Kin()},{owner: 'mine', koma: new Gin()},{owner: 'mine', koma: new Keima()},{owner: 'mine', koma: new Kyosha()}
+    {owner: 'first', koma: new Fu()},{owner: 'first', koma: new Fu()},{owner: 'first', koma: new Fu()},{owner: 'first', koma: new Fu()},{owner: 'first', koma: new Fu()},{owner: 'first', koma: new Fu()},{owner: 'first', koma: new Fu()},{owner: 'first', koma: new Fu()},{owner: 'first', koma: new Fu()},
+    null,{owner: 'first', koma: new Kaku()},null,null,null,null,null,{owner: 'first', koma: new Hisha()},null,
+    {owner: 'first', koma: new Kyosha()},{owner: 'first', koma: new Keima()},{owner: 'first', koma: new Gin()},{owner: 'first', koma: new Kin()},{owner: 'first', koma: new Gyoku()},{owner: 'first', koma: new Kin()},{owner: 'first', koma: new Gin()},{owner: 'first', koma: new Keima()},{owner: 'first', koma: new Kyosha()}
   ];
   constructor(props) {
     super(props);
@@ -137,6 +144,13 @@ class Game extends React.Component {
           <Board
             squares={currentSquare}
             onKomaMove={(beforeIndex, afterIndex) => this.handleKomaMove(beforeIndex, afterIndex)}
+            player="first"
+          />
+          <br />
+          <Board
+            squares={currentSquare}
+            onKomaMove={(beforeIndex, afterIndex) => this.handleKomaMove(beforeIndex, afterIndex)}
+            player="second"
           />
         </div>
       </div>
