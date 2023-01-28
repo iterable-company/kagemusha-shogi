@@ -53,6 +53,39 @@ body {
   .kagemusha {
     color: blue !important;
   }
+
+  .container {
+    height: 100%;
+    width: 100%;
+    font-size: 0;
+  }
+
+  .other-koma-dai {
+    display: inline-block;
+    *display: inline;
+    zoom: 1;
+    vertical-align: top;
+    font-size: 24px;
+    width: 20%;
+  }
+
+  .board {
+    display: inline-block;
+    *display: inline;
+    zoom: 1;
+    vertical-align: top;
+    font-size: 24px;
+    width: 60%;
+  }
+
+  .koma-dai {
+    display: inline-block;
+    *display: inline;
+    zoom: 1;
+    vertical-align: bottom;
+    font-size: 24px;
+    width: 20%;
+  }
   
   .game {
     display: flex;

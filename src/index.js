@@ -135,16 +135,20 @@ class Board extends React.Component {
     return (
       <div>
         <p>{information}</p>
-        <div>
-          {this.renderRow(0)}
-          {this.renderRow(9)}
-          {this.renderRow(18)}
-          {this.renderRow(27)}
-          {this.renderRow(36)}
-          {this.renderRow(45)}
-          {this.renderRow(54)}
-          {this.renderRow(63)}
-          {this.renderRow(72)}
+        <div className='container'>
+          <div className='other-koma-dai'>後手番の駒台</div>
+          <div className='board'>
+            {this.renderRow(0)}
+            {this.renderRow(9)}
+            {this.renderRow(18)}
+            {this.renderRow(27)}
+            {this.renderRow(36)}
+            {this.renderRow(45)}
+            {this.renderRow(54)}
+            {this.renderRow(63)}
+            {this.renderRow(72)}
+          </div>
+          <div className='koma-dai'>先手番の駒台</div>
         </div>
       </div>
     );
