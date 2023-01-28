@@ -17,6 +17,10 @@ class Koma {
         if (this.isPromoted) return this.promotedName;
         return this.name;
     }
+    getInit() {
+        this.isPromoted = false;
+        return this;
+    }
 }
 
 export class Fu extends Koma {

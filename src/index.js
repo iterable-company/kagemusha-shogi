@@ -282,10 +282,20 @@ function calculateCurrentSquares(init, history) {
     const afterIndex = move.afterIndex;
     const promote = move.promote;
     const value = acc[beforeIndex];
+    
     if (promote) {
       value.koma.promote();
     }
     acc[beforeIndex] = null;
+
+    if (acc[afterIndex]) {
+      const afterValue = acc[afterIndex];
+      const koma = afterValue.koma;
+      const player = Player.getOther(afterValue.owner);
+      const komaDaiIndex = getKomaDaiIndex(player, false, koma);
+      acc[komaDaiIndex] += 1;
+    }
+    
     acc[afterIndex] = value;
     return acc;
   }, init)
