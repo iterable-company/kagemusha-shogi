@@ -126,6 +126,30 @@ class Board extends React.Component {
     )
   }
 
+  renderKomaDai(player, isOther) {
+    return (
+      <div className="board-row">
+        {this.renderKomaDaiSquare(player, isOther, new Gyoku())}
+        {this.renderKomaDaiSquare(player, isOther, new Hisha())}
+        {this.renderKomaDaiSquare(player, isOther, new Kaku())}
+        {this.renderKomaDaiSquare(player, isOther, new Kin())}
+        {this.renderKomaDaiSquare(player, isOther, new Gin())}
+        {this.renderKomaDaiSquare(player, isOther, new Keima())}
+        {this.renderKomaDaiSquare(player, isOther, new Kyosha())}
+        {this.renderKomaDaiSquare(player, isOther, new Fu())}
+      </div>
+    )
+  }
+
+  renderKomaDaiSquare(player, isOther, komaClass) {
+    const index = getKomaDaiIndex(player, isOther, komaClass);
+    return (
+      <button className="komadai">  
+        {komaClass.displayName() + this.props.squares[index]}
+      </button>
+    );
+  }
+
   render() {
     var information = "";
     if (this.props.winner) { information = `Player: ${this.props.winner} の勝利です。`}
@@ -135,21 +159,19 @@ class Board extends React.Component {
     return (
       <div>
         <p>{information}</p>
-        <div className='container'>
-          <div className='other-koma-dai'>後手番の駒台</div>
-          <div className='board'>
-            {this.renderRow(0)}
-            {this.renderRow(9)}
-            {this.renderRow(18)}
-            {this.renderRow(27)}
-            {this.renderRow(36)}
-            {this.renderRow(45)}
-            {this.renderRow(54)}
-            {this.renderRow(63)}
-            {this.renderRow(72)}
-          </div>
-          <div className='koma-dai'>先手番の駒台</div>
+        <div>{this.renderKomaDai(this.props.player, true)}</div>
+        <div>
+          {this.renderRow(0)}
+          {this.renderRow(9)}
+          {this.renderRow(18)}
+          {this.renderRow(27)}
+          {this.renderRow(36)}
+          {this.renderRow(45)}
+          {this.renderRow(54)}
+          {this.renderRow(63)}
+          {this.renderRow(72)}
         </div>
+        <div>{this.renderKomaDai(this.props.player, false)}</div>
       </div>
     );
   }
@@ -165,7 +187,8 @@ class Game extends React.Component {
     null,null,null,null,null,null,null,null,null,
     {owner: Player.first, koma: new Fu()},{owner: Player.first, koma: new Fu()},{owner: Player.first, koma: new Fu()},{owner: Player.first, koma: new Fu()},{owner: Player.first, koma: new Fu()},{owner: Player.first, koma: new Fu()},{owner: Player.first, koma: new Fu()},{owner: Player.first, koma: new Fu()},{owner: Player.first, koma: new Fu()},
     null,{owner: Player.first, koma: new Kaku()},null,null,null,null,null,{owner: Player.first, koma: new Hisha()},null,
-    {owner: Player.first, koma: new Kyosha()},{owner: Player.first, koma: new Keima()},{owner: Player.first, koma: new Gin()},{owner: Player.first, koma: new Kin()},{owner: Player.first, koma: new Gyoku()},{owner: Player.first, koma: new Kin()},{owner: Player.first, koma: new Gin()},{owner: Player.first, koma: new Keima()},{owner: Player.first, koma: new Kyosha()}
+    {owner: Player.first, koma: new Kyosha()},{owner: Player.first, koma: new Keima()},{owner: Player.first, koma: new Gin()},{owner: Player.first, koma: new Kin()},{owner: Player.first, koma: new Gyoku()},{owner: Player.first, koma: new Kin()},{owner: Player.first, koma: new Gin()},{owner: Player.first, koma: new Keima()},{owner: Player.first, koma: new Kyosha()},
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
   ];
   constructor(props) {
     super(props);
@@ -268,6 +291,25 @@ function calculateCurrentSquares(init, history) {
   }, init)
 }
 
+const MochiGomaIndex = [
+  {index: 81, player: Player.first, komaClass: new Gyoku()},
+  {index: 82, player: Player.first, komaClass: new Hisha()},
+  {index: 83, player: Player.first, komaClass: new Kaku()},
+  {index: 84, player: Player.first, komaClass: new Kin()},
+  {index: 85, player: Player.first, komaClass: new Gin()},
+  {index: 86, player: Player.first, komaClass: new Keima()},
+  {index: 87, player: Player.first, komaClass: new Kyosha()},
+  {index: 88, player: Player.first, komaClass: new Fu()},
+  {index: 89, player: Player.second, komaClass: new Gyoku()},
+  {index: 90, player: Player.second, komaClass: new Hisha()},
+  {index: 91, player: Player.second, komaClass: new Kaku()},
+  {index: 92, player: Player.second, komaClass: new Kin()},
+  {index: 93, player: Player.second, komaClass: new Gin()},
+  {index: 94, player: Player.second, komaClass: new Keima()},
+  {index: 95, player: Player.second, komaClass: new Kyosha()},
+  {index: 96, player: Player.second, komaClass: new Fu()}
+];
+
 function canPromote(player, koma, beforeIndex, afterIndex) {
   if (!koma.canPromote()) return false;
   if (isPromoteIndex(player, afterIndex)) return true;
@@ -312,6 +354,12 @@ function getKagemushaByPlayer(player, kagemusha) {
 function getIndex(player, i) {
   if (player === Player.first) { return i;}
   else { return  80 - i;}
+}
+
+function getKomaDaiIndex(player, isOther, komaClass) {
+  var p = player;
+  if (isOther) { p = Player.getOther(player)}
+  return MochiGomaIndex.filter((value) => value.player === p && value.komaClass.constructor === komaClass.constructor)[0].index;
 }
 
 // ========================================

@@ -18,7 +18,7 @@ body {
   }
   
   .square {
-    background: #fff;
+    background: #FFEFD5;
     border: 1px solid #999;
     float: left;
     font-size: 24px;
@@ -26,6 +26,20 @@ body {
     height: 34px;
     margin-right: -1px;
     margin-top: -1px;
+    padding: 0;
+    text-align: center;
+    width: 34px;
+  }
+
+  .komadai {
+    background: #fff;
+    border: 0px #fff;
+    float: left;
+    font-size: 12px;
+    line-height: 34px;
+    height: 34px;
+    margin-right: -1px;
+    margin-top: 0px;
     padding: 0;
     text-align: center;
     width: 34px;
