@@ -8,6 +8,7 @@ function Square(props) {
   function notYourTurn() {
     window.alert("あなたの手番ではありません。");
   }
+  console.log("props.value: " + JSON.stringify(props.value));
   var classNames = ["square"];
   if (props.value && props.value.owner !== props.player) {
     classNames.push("other");
@@ -77,8 +78,11 @@ class Board extends React.Component {
     const horizontalDiff = coeff * (afterSujiDan[0] - beforeSujiDan[0]);
 
     if (
-      !koma.canMove(virticalDiff, horizontalDiff) || 
-      (this.props.squares[afterIndex] && this.props.squares[afterIndex].owner === this.props.player)
+      beforeIndex < 81 && (
+        !koma.canMove(virticalDiff, horizontalDiff) || 
+        (this.props.squares[afterIndex] && this.props.squares[afterIndex].owner === this.props.player) ||
+        80 < i
+      )
     ) {
       alert("そこには動かせません！");
       this.setState({
@@ -87,7 +91,7 @@ class Board extends React.Component {
       return;
     }
     var promote = false;
-    if (canPromote(this.props.player, koma, beforeIndex, afterIndex)) {
+    if (beforeIndex < 81 && canPromote(this.props.player, koma, beforeIndex, afterIndex)) {
       promote = window.confirm("成りますか？");
     }
     this.props.onKomaMove(beforeIndex, i, promote);
@@ -143,9 +147,10 @@ class Board extends React.Component {
 
   renderKomaDaiSquare(player, isOther, komaClass) {
     const index = getKomaDaiIndex(player, isOther, komaClass);
+    const onClickHandler = this.props.squares[index].number > 0 ? () => this.handleClick(index) : () => {}
     return (
-      <button className="komadai">  
-        {komaClass.displayName() + this.props.squares[index]}
+      <button className="komadai" onClick={onClickHandler}>  
+        {komaClass.displayName() + this.props.squares[index].number}
       </button>
     );
   }
@@ -188,7 +193,8 @@ class Game extends React.Component {
     {owner: Player.first, koma: new Fu()},{owner: Player.first, koma: new Fu()},{owner: Player.first, koma: new Fu()},{owner: Player.first, koma: new Fu()},{owner: Player.first, koma: new Fu()},{owner: Player.first, koma: new Fu()},{owner: Player.first, koma: new Fu()},{owner: Player.first, koma: new Fu()},{owner: Player.first, koma: new Fu()},
     null,{owner: Player.first, koma: new Kaku()},null,null,null,null,null,{owner: Player.first, koma: new Hisha()},null,
     {owner: Player.first, koma: new Kyosha()},{owner: Player.first, koma: new Keima()},{owner: Player.first, koma: new Gin()},{owner: Player.first, koma: new Kin()},{owner: Player.first, koma: new Gyoku()},{owner: Player.first, koma: new Kin()},{owner: Player.first, koma: new Gin()},{owner: Player.first, koma: new Keima()},{owner: Player.first, koma: new Kyosha()},
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+    {owner: Player.first, koma: new Gyoku(), number: 0},{owner: Player.first, koma: new Hisha(), number: 0},{owner: Player.first, koma: new Kaku(), number: 0},{owner: Player.first, koma: new Kin(), number: 0}, {owner: Player.first, koma: new Gin(), number: 0},{owner: Player.first, koma: new Keima(), number: 0}, {owner: Player.first, koma: new Kyosha(), number: 0},{owner: Player.first, koma: new Fu(), number: 0},
+    {owner: Player.second, koma: new Gyoku(), number: 0},{owner: Player.second, koma: new Hisha(), number: 0},{owner: Player.second, koma: new Kaku(), number: 0},{owner: Player.second, koma: new Kin(), number: 0}, {owner: Player.second, koma: new Gin(), number: 0},{owner: Player.second, koma: new Keima(), number: 0}, {owner: Player.second, koma: new Kyosha(), number: 0},{owner: Player.second, koma: new Fu(), number: 0}
   ];
   constructor(props) {
     super(props);
@@ -277,27 +283,35 @@ function sujiDanToIndex(suji, dan) {
 }
 
 function calculateCurrentSquares(init, history) {
-  return history.reduce((acc, move) => {
+  return history.reduce((acc, move, historyIndex) => {
+    var copiedAcc = acc.map((value) => {
+      if (value) {
+        return Object.assign({koma: value.koma.clone()}, value);
+      }
+      return value;
+    })
     const beforeIndex = move.beforeIndex;
     const afterIndex = move.afterIndex;
     const promote = move.promote;
-    const value = acc[beforeIndex];
+    const value = getKomaValue(copiedAcc, beforeIndex);
     
     if (promote) {
       value.koma.promote();
     }
-    acc[beforeIndex] = null;
+    if (beforeIndex < 81) {
+      copiedAcc[beforeIndex] = null;
+    }
 
-    if (acc[afterIndex]) {
-      const afterValue = acc[afterIndex];
+    if (copiedAcc[afterIndex]) {
+      const afterValue = copiedAcc[afterIndex];
       const koma = afterValue.koma;
       const player = Player.getOther(afterValue.owner);
       const komaDaiIndex = getKomaDaiIndex(player, false, koma);
-      acc[komaDaiIndex] += 1;
+      copiedAcc[komaDaiIndex].number += 1;
     }
     
-    acc[afterIndex] = value;
-    return acc;
+    copiedAcc[afterIndex] = value;
+    return copiedAcc;
   }, init)
 }
 
@@ -370,6 +384,12 @@ function getKomaDaiIndex(player, isOther, komaClass) {
   var p = player;
   if (isOther) { p = Player.getOther(player)}
   return MochiGomaIndex.filter((value) => value.player === p && value.komaClass.constructor === komaClass.constructor)[0].index;
+}
+
+function getKomaValue(acc, beforeIndex) {
+  if (beforeIndex < 81) return acc[beforeIndex];
+  acc[beforeIndex].number -= 1;
+  return {owner: acc[beforeIndex].owner, koma: acc[beforeIndex].koma};
 }
 
 // ========================================

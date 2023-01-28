@@ -18,8 +18,12 @@ class Koma {
         return this.name;
     }
     getInit() {
-        this.isPromoted = false;
-        return this;
+        return new Koma(this.name, this.promotedName);
+    }
+    clone() {
+        var cloned = new Koma(this.name, this.promotedName);
+        cloned.isPromoted = this.isPromoted;
+        return cloned;
     }
 }
 
