@@ -102,6 +102,7 @@ class Board extends React.Component {
   }
 
   handleClick(i) {
+    if (this.props.winner) return;
     if (!this.state.clickedIndex) {
       this.handleClickWhenNotClicked(i);
       return;
@@ -127,7 +128,8 @@ class Board extends React.Component {
 
   render() {
     var information = "";
-    if (this.props.turn !== this.props.player) {information = "相手番です。";}
+    if (this.props.winner) { information = `Player: ${this.props.winner} の勝利です。`}
+    else if (this.props.turn !== this.props.player) {information = "相手番です。";}
     else if (!this.props.kagemusha) {information = "影武者を選んでください"}
     else {information = "あなたの手番です。"}
     return (
@@ -167,14 +169,21 @@ class Game extends React.Component {
       history: [],
       turn: Player.first,
       kagemusha: {first: null, second: null},
+      winner: null,
     }
   }
 
   handleKomaMove(beforeIndex, afterIndex, promote, player) {
+    const winner = getWinnerIfExist(player, this.state.kagemusha, afterIndex);
+    if (winner) {
+      this.setState({
+        winner: winner,
+      })
+    }
     const init = this.initial.slice();
     const history = this.state.history.slice();
     const currentSquare = calculateCurrentSquares(init, history);
-    const kagemusha = getKagemusha(player, this.state.kagemusha, currentSquare, beforeIndex, afterIndex);
+    const kagemusha = getUpdatedKagemusha(player, this.state.kagemusha, currentSquare, beforeIndex, afterIndex);
 
     history.push({beforeIndex: beforeIndex, afterIndex: afterIndex, promote: promote});
 
@@ -212,6 +221,7 @@ class Game extends React.Component {
             turn={this.state.turn}
             kagemusha={this.state.kagemusha.first}
             onKagemushaSelected={(i) => this.handleKagemushaSelected(Player.first, i)}
+            winner={this.state.winner}
           />
           <br />
           <Board
@@ -221,6 +231,7 @@ class Game extends React.Component {
             turn={this.state.turn}
             kagemusha={this.state.kagemusha.second}
             onKagemushaSelected={(i) => this.handleKagemushaSelected(Player.second, i)}
+            winner={this.state.winner}
           />
         </div>
       </div>
@@ -267,8 +278,7 @@ function isPromoteIndex(player, index) {
   return false; 
 }
 
-function getKagemusha(player, kagemusha, currentSquare, beforeIndex, afterIndex) {
-  console.log("kagemusha, beforeIndex,afterIndex" + JSON.stringify(kagemusha) + "," + beforeIndex + "," + afterIndex);
+function getUpdatedKagemusha(player, kagemusha, currentSquare, beforeIndex, afterIndex) {
   if (currentSquare[beforeIndex].owner !== player) { return kagemusha; }
   
   var firstKagemusha = kagemusha.first;
@@ -280,6 +290,19 @@ function getKagemusha(player, kagemusha, currentSquare, beforeIndex, afterIndex)
     secondKagemusha = afterIndex;
   }
   return {first: firstKagemusha, second: secondKagemusha};
+}
+
+function getWinnerIfExist(player, kagemusha, afterIndex) {
+  const otherKagemusha = getKagemushaByPlayer(Player.getOther(player), kagemusha);
+  if (otherKagemusha === afterIndex) {
+    return player;
+  }
+  return null;
+}
+
+function getKagemushaByPlayer(player, kagemusha) {
+  if (player === Player.first) return kagemusha.first;
+  else return kagemusha.second;
 }
 
 function getIndex(player, i) {
