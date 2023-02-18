@@ -22,7 +22,7 @@ function Square(props) {
 
   const onClickHandler = props.player === props.turn ? props.onClick : notYourTurn;
   return (
-    <button className={classNames.join(" ")} onClick={onClickHandler}>  
+    <button id={Player.getClassName(props.player) + '-' + props.index} className={classNames.join(" ")} onClick={onClickHandler}>  
       {props.value ? props.value.koma.displayName() : ""}
     </button>
   );
@@ -39,6 +39,7 @@ class Board extends React.Component {
     const index = getIndex(this.props.player, i);
     return (
       <Square
+        index={i}
         value={this.props.squares[index]}
         onClick={() => this.handleClick(index)}
         player={this.props.player}
@@ -57,7 +58,7 @@ class Board extends React.Component {
       window.alert("敵の駒は選択できません。")
       return;
     }
-    if (!this.props.kagemusha) {
+    if (this.props.kagemusha !== 0 && !this.props.kagemusha) {
       window.alert(this.props.player + ": 影武者が選択されました。");
       this.props.onKagemushaSelected(i);
       return;
@@ -161,9 +162,10 @@ class Board extends React.Component {
     else if (this.props.turn !== this.props.player) {information = "相手番です。";}
     else if (!this.props.kagemusha) {information = "影武者を選んでください"}
     else {information = "あなたの手番です。"}
+    var className = Player.getClassName(this.props.player)
     return (
-      <div>
-        <p>{information}</p>
+      <div id={className}>
+        <p id={className + '-description'}>{information}</p>
         <div>{this.renderKomaDai(this.props.player, true)}</div>
         <div>
           {this.renderRow(0)}
