@@ -1,5 +1,5 @@
 describe('players', () => {
-  it("can move Fu to allowed square", () => {
+  it("can't move Fu to not-allowed square", () => {
     const validate_first = (txt) => {
       cy.removeListener('window:alert', validate_first)
       cy.on('window:alert', validate_second)
@@ -11,7 +11,7 @@ describe('players', () => {
       return true
     }
     const validate_move = (txt) => {
-      assert(false)
+      expect(txt).to.contains('そこには動かせません！')
       true
     }
     cy.visit('http://localhost:3000')
@@ -23,7 +23,36 @@ describe('players', () => {
     cy.get('#second').get('#second-description').should('have.text', '相手番です。')
 
     cy.get('#first-61').click()
-    cy.get('#first-52').click()
+    cy.get('#first-69').click()
+
     cy.wait(10000)
+
+    cy.get('#first-61').click()
+    cy.get('#first-70').click()
+
+    cy.wait(10000)
+
+    cy.get('#first-61').click()
+    cy.get('#first-71').click()
+
+    cy.wait(10000)
+
+    cy.get('#first-61').click()
+    cy.get('#first-60').click()
+
+    cy.wait(10000)
+
+    cy.get('#first-61').click()
+    cy.get('#first-62').click()
+
+    cy.wait(10000)
+
+    cy.get('#first-61').click()
+    cy.get('#first-51').click()
+
+    cy.wait(10000)
+
+    cy.get('#first-61').click()
+    cy.get('#first-53').click()
   })
 })

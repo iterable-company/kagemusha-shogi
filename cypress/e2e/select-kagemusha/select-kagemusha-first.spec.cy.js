@@ -1,5 +1,5 @@
-describe('players can select kagemusha', () => {
-  it('second player', () => {
+describe('players', () => {
+  it('can select kagemusha', () => {
     const validate_first = (txt) => {
       expect(txt).to.contains('1: 影武者が選択されました。')
       cy.removeListener('window:alert', validate_first)
