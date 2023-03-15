@@ -23,36 +23,6 @@ describe('players', () => {
     cy.get('#second').get('#second-description').should('have.text', '相手番です。')
 
     cy.get('#first-61').click()
-    cy.get('#first-69').click()
-
-    cy.wait(10000)
-
-    cy.get('#first-61').click()
-    cy.get('#first-70').click()
-
-    cy.wait(10000)
-
-    cy.get('#first-61').click()
     cy.get('#first-71').click()
-
-    cy.wait(10000)
-
-    cy.get('#first-61').click()
-    cy.get('#first-60').click()
-
-    cy.wait(10000)
-
-    cy.get('#first-61').click()
-    cy.get('#first-62').click()
-
-    cy.wait(10000)
-
-    cy.get('#first-61').click()
-    cy.get('#first-51').click()
-
-    cy.wait(10000)
-
-    cy.get('#first-61').click()
-    cy.get('#first-53').click()
   })
 })
